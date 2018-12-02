@@ -20,12 +20,12 @@ export function mdEnterAnimation(AnimationC: Animation, baseEl: HTMLElement, ev?
     ev && ev.target && (ev.target as HTMLElement).getBoundingClientRect();
 
   const targetTop =
-    targetDim && 'top' in targetDim
+    targetDim != null && 'top' in targetDim
       ? targetDim.top
       : bodyHeight / 2 - contentHeight / 2;
 
   const targetLeft =
-    targetDim && 'left' in targetDim
+    targetDim != null && 'left' in targetDim
       ? targetDim.left
       : bodyWidth / 2 - contentWidth / 2;
 
@@ -71,7 +71,7 @@ export function mdEnterAnimation(AnimationC: Animation, baseEl: HTMLElement, ev?
 
   const backdropAnimation = new AnimationC();
   backdropAnimation.addElement(baseEl.querySelector('ion-backdrop'));
-  backdropAnimation.fromTo('opacity', 0.01, 0.08);
+  backdropAnimation.fromTo('opacity', 0.01, 0.32);
 
   const wrapperAnimation = new AnimationC();
   wrapperAnimation.addElement(baseEl.querySelector('.popover-wrapper'));

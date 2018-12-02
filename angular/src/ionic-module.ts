@@ -1,4 +1,5 @@
 import { APP_INITIALIZER, ModuleWithProviders, NgModule } from '@angular/core';
+import { IonicConfig } from '@ionic/core';
 import { CommonModule } from '@angular/common';
 
 import { appInitialize } from './app-initialize';
@@ -13,6 +14,7 @@ const DECLARATIONS = [
   d.App,
   d.Avatar,
   d.BackButton,
+  d.Backdrop,
   d.Badge,
   d.Button,
   d.Buttons,
@@ -23,8 +25,6 @@ const DECLARATIONS = [
   d.CardTitle,
   d.Checkbox,
   d.Chip,
-  d.ChipButton,
-  d.ChipIcon,
   d.Col,
   d.Content,
   d.Datetime,
@@ -34,7 +34,6 @@ const DECLARATIONS = [
   d.Footer,
   d.Grid,
   d.Header,
-  d.HideWhen,
   d.Icon,
   d.Img,
   d.InfiniteScroll,
@@ -66,20 +65,20 @@ const DECLARATIONS = [
   d.ReorderGroup,
   d.RippleEffect,
   d.Row,
-  d.Scroll,
   d.Searchbar,
   d.Segment,
   d.SegmentButton,
   d.Select,
   d.SelectOption,
   d.SelectPopover,
-  d.ShowWhen,
   d.SkeletonText,
   d.Slide,
   d.Slides,
   d.Spinner,
   d.SplitPane,
   d.Tab,
+  d.TabBar,
+  d.TabButton,
   d.Tabs,
   d.Text,
   d.Textarea,
@@ -98,7 +97,6 @@ const DECLARATIONS = [
   // navigation
   c.IonBackButton,
   c.IonRouterOutlet,
-  c.RouterDirection,
   c.NavDelegate,
   c.TabDelegate,
   c.TabsDelegate,
@@ -133,7 +131,7 @@ const PROVIDERS = [
   imports: [CommonModule]
 })
 export class IonicModule {
-  static forRoot(config?: { [key: string]: any }): ModuleWithProviders {
+  static forRoot(config?: IonicConfig): ModuleWithProviders {
     return {
       ngModule: IonicModule,
       providers: [

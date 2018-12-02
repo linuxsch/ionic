@@ -4,6 +4,10 @@
 // --------------------------------------------------
 
 :host {
+  /**
+   * @prop --width: Width of the action sheet
+   * @prop --max-width: Maximum width of the action sheet
+   */
   --width: #{$action-sheet-width};
   --max-width: #{$action-sheet-max-width};
 
@@ -13,7 +17,10 @@
   display: block;
   position: fixed;
 
+  font-family: $font-family-base;
+
   touch-action: none;
+  user-select: none;
   z-index: $z-index-overlay;
 }
 

@@ -1,7 +1,7 @@
-import { Component, Element, Event, EventEmitter, Prop, State, Watch } from '@stencil/core';
+import { Component, ComponentInterface, Element, Event, EventEmitter, Prop, State, Watch } from '@stencil/core';
 
-import { CheckedInputChangeEvent, Color, Mode, RadioButtonInput, StyleEvent } from '../../interface';
-import { deferEvent } from '../../utils/helpers';
+import { CheckedInputChangeEvent, Color, Mode, StyleEvent } from '../../interface';
+import { findItemLabel } from '../../utils/helpers';
 import { createColorClasses, hostContext } from '../../utils/theme';
 
 @Component({
@@ -12,10 +12,9 @@ import { createColorClasses, hostContext } from '../../utils/theme';
   },
   shadow: true
 })
-export class Radio implements RadioButtonInput {
+export class Radio implements ComponentInterface {
 
   private inputId = `ion-rb-${radioButtonIds++}`;
-  private nativeInput!: HTMLInputElement;
 
   @State() keyFocus = false;
 
@@ -30,7 +29,6 @@ export class Radio implements RadioButtonInput {
 
   /**
    * The mode determines which platform styles to use.
-   * Possible values are: `"ios"` or `"md"`.
    */
   @Prop() mode!: Mode;
 
@@ -39,20 +37,20 @@ export class Radio implements RadioButtonInput {
    */
   @Prop() name: string = this.inputId;
 
-  /*
-   * If true, the user cannot interact with the radio. Defaults to `false`.
+  /**
+   * If `true`, the user cannot interact with the radio.
    */
   @Prop() disabled = false;
 
   /**
-   * If true, the radio is selected. Defaults to `false`.
+   * If `true`, the radio is selected.
    */
   @Prop({ mutable: true }) checked = false;
 
   /**
    * the value of the radio.
    */
-  @Prop({ mutable: true }) value!: string;
+  @Prop({ mutable: true }) value?: any | null;
 
   /**
    * Emitted when the radio loads.
@@ -66,6 +64,7 @@ export class Radio implements RadioButtonInput {
 
   /**
    * Emitted when the styles change.
+   * @internal
    */
   @Event() ionStyle!: EventEmitter<StyleEvent>;
 
@@ -84,34 +83,6 @@ export class Radio implements RadioButtonInput {
    */
   @Event() ionBlur!: EventEmitter<void>;
 
-  componentWillLoad() {
-    this.ionSelect = deferEvent(this.ionSelect);
-    this.ionStyle = deferEvent(this.ionStyle);
-
-    if (this.value === undefined) {
-      this.value = this.inputId;
-    }
-    this.emitStyle();
-  }
-
-  componentDidLoad() {
-    this.ionRadioDidLoad.emit();
-    this.nativeInput.checked = this.checked;
-
-    const parentItem = this.nativeInput.closest('ion-item');
-    if (parentItem) {
-      const itemLabel = parentItem.querySelector('ion-label');
-      if (itemLabel) {
-        itemLabel.id = this.inputId + '-lbl';
-        this.nativeInput.setAttribute('aria-labelledby', itemLabel.id);
-      }
-    }
-  }
-
-  componentDidUnload() {
-    this.ionRadioDidUnload.emit();
-  }
-
   @Watch('color')
   colorChanged() {
     this.emitStyle();
@@ -119,11 +90,6 @@ export class Radio implements RadioButtonInput {
 
   @Watch('checked')
   checkedChanged(isChecked: boolean) {
-    if (this.nativeInput.checked !== isChecked) {
-      // keep the checked value and native input `nync
-      this.nativeInput.checked = isChecked;
-    }
-
     if (isChecked) {
       this.ionSelect.emit({
         checked: true,
@@ -134,45 +100,63 @@ export class Radio implements RadioButtonInput {
   }
 
   @Watch('disabled')
-  disabledChanged(isDisabled: boolean) {
-    this.nativeInput.disabled = isDisabled;
+  disabledChanged() {
     this.emitStyle();
   }
 
-  emitStyle() {
+  componentWillLoad() {
+    if (this.value === undefined) {
+      this.value = this.inputId;
+    }
+    this.emitStyle();
+  }
+
+  componentDidLoad() {
+    this.ionRadioDidLoad.emit();
+  }
+
+  componentDidUnload() {
+    this.ionRadioDidUnload.emit();
+  }
+
+  private emitStyle() {
     this.ionStyle.emit({
       'radio-checked': this.checked,
       'interactive-disabled': this.disabled,
     });
   }
 
-  onClick() {
-    this.checkedChanged(true);
-  }
-
-  onChange() {
+  private onClick = () => {
     this.checked = true;
-    this.nativeInput.focus();
   }
 
-  onKeyUp() {
+  private onKeyUp = () => {
     this.keyFocus = true;
   }
 
-  onFocus() {
+  private onFocus = () => {
     this.ionFocus.emit();
   }
 
-  onBlur() {
+  private onBlur = () => {
     this.keyFocus = false;
     this.ionBlur.emit();
   }
 
   hostData() {
+    const labelId = this.inputId + '-lbl';
+    const label = findItemLabel(this.el);
+    if (label) {
+      label.id = labelId;
+    }
     return {
+      'role': 'radio',
+      'aria-disabled': this.disabled ? 'true' : null,
+      'aria-checked': `${this.checked}`,
+      'aria-labelledby': labelId,
       class: {
         ...createColorClasses(this.color),
-        'in-item': hostContext('.item', this.el),
+        'in-item': hostContext('ion-item', this.el),
         'interactive': true,
         'radio-checked': this.checked,
         'radio-disabled': this.disabled,
@@ -186,18 +170,14 @@ export class Radio implements RadioButtonInput {
       <div class="radio-icon">
         <div class="radio-inner"/>
       </div>,
-      <input
-        type="radio"
-        onClick={this.onClick.bind(this)}
-        onChange={this.onChange.bind(this)}
-        onFocus={this.onFocus.bind(this)}
-        onBlur={this.onBlur.bind(this)}
-        onKeyUp={this.onKeyUp.bind(this)}
-        id={this.inputId}
-        name={this.name}
-        value={this.value}
-        disabled={this.disabled}
-        ref={r => this.nativeInput = (r as any)}/>
+      <button
+        type="button"
+        onClick={this.onClick}
+        onKeyUp={this.onKeyUp}
+        onFocus={this.onFocus}
+        onBlur={this.onBlur}
+      >
+      </button>,
     ];
   }
 }

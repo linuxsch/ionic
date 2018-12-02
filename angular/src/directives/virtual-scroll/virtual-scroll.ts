@@ -20,9 +20,9 @@ import { VirtualContext } from './virtual-utils';
 })
 export class VirtualScroll {
 
-  @ContentChild(VirtualItem) itmTmp: VirtualItem;
-  @ContentChild(VirtualHeader) hdrTmp: VirtualHeader;
-  @ContentChild(VirtualFooter) ftrTmp: VirtualFooter;
+  @ContentChild(VirtualItem) itmTmp!: VirtualItem;
+  @ContentChild(VirtualHeader) hdrTmp!: VirtualHeader;
+  @ContentChild(VirtualFooter) ftrTmp!: VirtualFooter;
 
   constructor(
     private el: ElementRef,
@@ -30,7 +30,7 @@ export class VirtualScroll {
   ) {
     el.nativeElement.nodeRender = this.nodeRender.bind(this);
 
-    proxyInputs(this, this.el, [
+    proxyInputs(this, this.el.nativeElement, [
       'approxItemHeight',
       'approxHeaderHeight',
       'approxFooterHeight',

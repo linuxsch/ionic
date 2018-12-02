@@ -1,7 +1,5 @@
 import { Animation, AnimationBuilder, ComponentRef, FrameworkDelegate, Mode, ViewController } from '../../interface';
 
-export { Nav } from './nav';
-
 export type NavDirection = 'back' | 'forward';
 
 export type NavComponent = ComponentRef | ViewController;
@@ -14,6 +12,12 @@ export interface NavResult {
   direction?: NavDirection;
 }
 
+export interface SwipeGestureHandler {
+  canStart(): boolean;
+  onStart(): void;
+  onEnd(shouldComplete: boolean): void;
+}
+
 export interface RouterOutletOptions {
   animated?: boolean;
   animationBuilder?: AnimationBuilder;
@@ -24,6 +28,8 @@ export interface RouterOutletOptions {
   deepWait?: boolean;
   mode?: Mode;
   keyboardClose?: boolean;
+  skipIfBusy?: boolean;
+  progressAnimation?: boolean;
 }
 
 export interface NavOptions extends RouterOutletOptions {

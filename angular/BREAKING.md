@@ -20,8 +20,8 @@ A list of the breaking changes introduced to each component in Ionic Angular v4.
 - [Alert](#alert)
 - [Back Button](#back-button)
 - [Button](#button)
-- [Chip](#chip)
 - [Colors](#colors)
+- [Content](#content)
 - [Datetime](#datetime)
 - [Dynamic Mode](#dynamic-mode)
 - [FAB](#fab)
@@ -35,6 +35,8 @@ A list of the breaking changes introduced to each component in Ionic Angular v4.
 - [Item Sliding](#item-sliding)
 - [Label](#label)
 - [List Header](#list-header)
+- [Loading](#loading)
+- [Menu](#menu)
 - [Menu Toggle](#menu-toggle)
 - [Modal](#modal)
 - [Nav](#nav)
@@ -44,8 +46,10 @@ A list of the breaking changes introduced to each component in Ionic Angular v4.
 - [Radio](#radio)
 - [Range](#range)
 - [Refresher](#refresher)
-- [Segment](#segment)
+- [Scroll](#scroll)
+- [Segment Button](#segment-button)
 - [Select](#select)
+- [Show When / Hide When](#show-when--hide-when)
 - [Spinner](#spinner)
 - [Tabs](#tabs)
 - [Text / Typography](#text--typography)
@@ -55,14 +59,15 @@ A list of the breaking changes introduced to each component in Ionic Angular v4.
 
 ## Action Sheet
 
-The `title` and `subTitle` properties has been renamed to `header` and `subHeader` respectively.
+The `title`, `subTitle` and `enableBackdropDismiss` properties has been renamed to `header`, `subHeader` and `backdropDismiss` respectively.
 
 **Old Usage Example:**
 
 ```js
 const actionSheet = await actionSheetCtrl.create({
   title: 'This is the title',
-  subTitle: 'this is the sub title'
+  subTitle: 'this is the sub title',
+  enableBackdropDismiss: false
 });
 await actionSheet.present();
 ```
@@ -72,7 +77,8 @@ await actionSheet.present();
 ```js
 const actionSheet = await actionSheetCtrl.create({
   header: 'This is the title',
-  subHeader: 'this is the sub title'
+  subHeader: 'this is the sub title',
+  backdropDismiss: false
 });
 await actionSheet.present();
 ```
@@ -80,14 +86,15 @@ await actionSheet.present();
 
 ## Alert
 
-The `title` and `subTitle` properties has been renamed to `header` and `subHeader` respectivelly.
+The `title`, `subTitle` and `enableBackdropDismiss` properties has been renamed to `header`, `subHeader` and `backdropDismiss` respectivelly.
 
 **Old Usage Example:**
 
 ```js
 const alert = await alertCtrl.create({
   title: 'This is the title',
-  subTitle: 'this is the sub title'
+  subTitle: 'this is the sub title',
+  enableBackdropDismiss: false
 });
 await alert.present();
 ```
@@ -97,7 +104,8 @@ await alert.present();
 ```js
 const alert = await alertCtrl.create({
   header: 'This is the title',
-  subHeader: 'this is the sub title'
+  subHeader: 'this is the sub title',
+  backdropDismiss: false
 });
 await alert.present();
 ```
@@ -242,34 +250,6 @@ The `small` and `large` attributes are now combined under the `size` attribute. 
 </ion-button>
 ```
 
-## Chip
-
-### Markup Changed
-
-Buttons inside of an `<ion-chip>` container should now be written as an `<ion-chip-button>` element. Ionic will determine when to render an anchor tag based on the presence of an `href` attribute.
-
-**Old Usage Example:**
-
-```html
-<ion-chip>
-  <ion-label>Default</ion-label>
-  <ion-button clear color="light">
-    <ion-icon name="close-circle"></ion-icon>
-  </ion-button>
-</ion-chip>
-```
-
-**New Usage Example:**
-
-```html
-<ion-chip>
-  <ion-label>Default</ion-label>
-  <ion-chip-button fill="clear" color="light">
-    <ion-icon name="close-circle"></ion-icon>
-  </ion-chip-button>
-</ion-chip>
-```
-
 
 ## Colors
 
@@ -298,6 +278,23 @@ dark:            #222428
 ```
 
 The `secondary` color saw the largest change. If you were previously using our `secondary` color we recommend switching to `success` instead.
+
+
+## Content
+
+Content is now a drop-in replacement for `ion-scroll`, that means `ion-content` is much more flexible today, they can be used anywhere, even in a nested fashion.
+
+### resize() was removed
+
+In Ionic 4, `ion-content` layout is based in flex, that means their size will automatically adjust without requiring to call resize() programmatically.
+
+
+### Attributes Renamed
+
+
+| Old Property | New Property          | Property Behavior |
+|--------------|-----------------------|-------------------------------------------------------------------------|
+| no-bounce    | forceOverflow="false" | If true and the content does not cause an overflow scroll, the scroll interaction will cause a bounce. |
 
 
 ## Datetime
@@ -788,6 +785,40 @@ Previously an `ion-label` would automatically get added to an `ion-list-header` 
 </ion-list-header>
 ```
 
+## Loading
+
+`dismissOnPageChange` was removed. Fortunatelly all the navigation API is promise based and there are global events  (`ionNavWillChange`) you can listen in order to detect when navigation occurs.
+
+You should take advantage of these APIs in order to dismiss your loading overlay explicitally.
+
+
+## Menu
+
+### Prop renamed
+
+The `swipeEnabled` prop has been renamed to `swipeGesture`.
+The `content` prop has been renamed to `contentId` and it points to the DOM id of the content:
+
+**Old Usage Example:**
+
+```html
+<ion-menu swipeEnabled="false" content="nav"> </ion-menu>
+<ion-nav #nav></ion-nav>
+```
+
+### Events renamed
+
+- `ionClose` was renamed to `ionDidClose`
+- `ionOpen` was renamed to `ionDidOpen`
+
+
+**New Usage Example:**
+
+```html
+<ion-menu swipeGesture="false" contentId="nav"> </ion-menu>
+<ion-nav id="nav"></ion-nav>
+```
+
 ## Menu Toggle
 
 ### Markup Changed
@@ -869,8 +900,11 @@ export class MyPage {
 ### Method renamed
 
 The `remove` method has been renamed to `removeIndex` to avoid conflicts with HTML and be more descriptive as to what it does.
-
 The `getActiveChildNavs` method has been renamed to `getChildNavs`.
+
+### Prop renamed
+
+The `swipeBackEnabled` prop has been renamed to `swipeGesture`.
 
 
 ## Navbar
@@ -932,7 +966,11 @@ The class has been renamed from `Option` to `SelectOption` to keep it consistent
 
 ### Markup Changed
 
-Action Sheet, Alert, Loading, Modal, Popover, and Toast should now use `async`/`await`:
+Action Sheet, Alert, Loading, Modal, Popover, and Toast:
+ - Should now use `async`/`await`
+ - `enableBackdropDismiss` has been renamed to `backdropDismiss`.
+
+
 
 **Old Usage Example:**
 
@@ -940,8 +978,9 @@ Action Sheet, Alert, Loading, Modal, Popover, and Toast should now use `async`/`
 presentPopover(ev: any) {
   const popover = this.popoverController.create({
     component: PopoverComponent,
-    ev: event,
-    translucent: true
+    event: event,
+    translucent: true,
+    enableBackdropDismiss: false
   });
   popover.present();
 }
@@ -953,8 +992,9 @@ presentPopover(ev: any) {
 async presentPopover(ev: any) {
   const popover = await this.popoverController.create({
     component: PopoverComponent,
-    ev: event,
-    translucent: true
+    event: event,
+    translucent: true,
+    backdropDismiss: false
   });
   return await popover.present();
 }
@@ -1113,10 +1153,43 @@ The `enabled` property (with a default value of `true`) has been renamed to `dis
 </ion-refresher>
 ```
 
+## Scroll
 
-## Segment
+`ion-scroll` has been removed, fortunatelly `ion-content` can work as a drop-in replacement:
 
-The markup hasn't changed for Segments, but now writing `<ion-segment-button>` will render a native button element inside of it.
+```diff
+- <ion-scroll scrollX="true">
++ <ion-content scrollX="true">
+```
+
+Another very good option is to style a `div` to become scrollable using CSS:
+
+```css
+div.scrollable {
+  overflow: scroll
+}
+```
+
+
+## Segment Button
+
+Segment Button text is now required to be wrapped in an `ion-label`.
+
+*Old usage:*
+
+```html
+<ion-segment-button>
+  Item One
+</ion-segment-button>
+```
+
+*New usage:*
+
+```html
+<ion-segment-button>
+  <ion-label>Item One</ion-label>
+</ion-segment-button>
+```
 
 
 ## Select
@@ -1152,6 +1225,195 @@ this.customOptions = {
   subTitle: 'Select your toppings'
 };
 ```
+
+## Show When / Hide When
+
+The `showWhen` and `hideWhen` directives (`ion-show-when` and `ion-hide-when` components) have been removed in v4 in favor of using CSS and [media queries](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries) to accomplish the desired look.
+
+### Media Query Examples
+
+Examples of media queries in CSS:
+
+```css
+/* targeting only portrait orientation */
+@media (orientation: portrait) {
+  /* CSS to apply when orientation is portrait goes here */
+}
+
+/* targeting only landscape orientation */
+@media (orientation: landscape) {
+  /* CSS to apply when orientation is landscape goes here */
+}
+
+/* targeting minimum width */
+@media (min-width: 300px) {
+  /* CSS to apply when the minimum width is 300px goes here */
+}
+
+/* targeting both minimum width and maximum width */
+@media (min-width: 300px) and (max-width: 600px) {
+  /* CSS to apply when the minimum width is 300px and maximum width is 600px goes here */
+}
+```
+
+### Showing and Hiding by Breakpoint
+
+The default breakpoints used by Ionic can be used internally if desired:
+
+| Breakpoint | Screen Width |
+| -----------| -------------|
+| `xs`       | `0`          |
+| `sm`       | `576px`      |
+| `md`       | `768px`      |
+| `lg`       | `992px`      |
+| `xl`       | `1200px`     |
+
+For example, to hide all `h3` elements when the minimum breakpoint is `sm`, the following CSS can be used:
+
+```css
+/* Hide all h3 elements when the minimum width is 576px (sm breakpoint) */
+@media (min-width: 576px) {
+  h3 {
+    display: none;
+  }
+}
+```
+
+You can even create your own reusable classes for this, such as the following:
+
+```css
+/* Hide all elements with the .hide-xs-up class when the minimum width is 0px (xs breakpoint) */
+@media (min-width: 0px) {
+  .hide-xs-up {
+    display: none;
+  }
+}
+
+/* Hide all elements with the .hide-sm-up class when the minimum width is 576px (sm breakpoint) */
+@media (min-width: 576px) {
+  .hide-sm-up {
+    display: none;
+  }
+}
+
+/* Repeat above for the other breakpoints */
+```
+
+This can also be combined to only show specific elements when there is a min width:
+
+```css
+@media (min-width: 0px) {
+  /* Hide all elements with the .hide-xs-up class when the minimum width is 0px (xs breakpoint) */
+  .hide-xs-up {
+    display: none;
+  }
+
+  /* Show all elements with the .show-xs-up class when the minimum width is 0px (xs breakpoint) */
+  .show-xs-up {
+    display: block;
+  }
+}
+
+@media (min-width: 576px) {
+  /* Hide all elements with the .hide-sm-up class when the minimum width is 576px (sm breakpoint) */
+  .hide-sm-up {
+    display: none;
+  }
+
+  /* Show all elements with the .show-sm-up class when the minimum width is 576px (sm breakpoint) */
+  .show-sm-up {
+    display: block;
+  }
+}
+
+/* Repeat above for the other breakpoints */
+```
+
+If you'd only like to show the element when it is in that specific breakpoint, but don't want to add multiple classes to achieve it, you can combine `min-width` and `max-width` to target specific breakpoints:
+
+```css
+@media (min-width: 0px) and (max-width: 575px) {
+  /* Hide all elements with the .hide-xs-only class when the minimum width is 0px (xs breakpoint) and the maximum width is 575px (right before sm breakpoint) */
+  .show-xs-only {
+    display: block;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+  /* Hide all elements with the .hide-sm-only class when the minimum width is 576px (sm breakpoint) and the maximum width is 767px (right before md breakpoint) */
+  .show-sm-only {
+    display: block;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  /* Hide all elements with the .hide-md-only class when the minimum width is 768px (md breakpoint) and the maximum width is 991px (right before lg breakpoint) */
+  .show-md-only {
+    display: block;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  /* Hide all elements with the .hide-lg-only class when the minimum width is 992px (lg breakpoint) and the maximum width is 1199px (right before xl breakpoint) */
+  .show-lg-only {
+    display: block;
+  }
+}
+
+/* Not necessary for xl since there isn't a larger breakpoint, can use the show-xl-up */
+```
+
+### Showing and Hiding by Mode
+
+Styling based on the mode can be achieved by targeting an element with the mode class as the parent.
+
+For example, to hide all `h3` elements when the mode is `md`, the following CSS can be used:
+
+```css
+/* Hide all h3 elements when the mode is md */
+.md h3 {
+  display: none;
+}
+```
+
+Similar to breakpoints, a class can be created to make this easier. For example, to hide all elements with the `.hide-ios` class in `ios` mode:
+
+```css
+/* Hide all elements when the mode is ios and they have the .hide-ios class */
+.ios .hide-ios {
+  display: none;
+}
+```
+
+### Showing and Hiding by Platform
+
+Styling based on the platform is similar to styling by mode and can be achieved by targeting an element with the class `plt-{PLATFORM}` where {PLATFORM} is the name of the platform to be styled, from the following list:
+
+```
+ipad
+iphone
+ios
+android
+phablet
+tablet
+cordova
+capacitor
+electron
+pwa
+mobile
+desktop
+hybrid
+```
+
+For example, to hide all `h3` elements when the platform is `desktop`, the following CSS can be used:
+
+```css
+/* Hide all h3 elements when the platform is desktop */
+.plt-desktop h3 {
+  display: none;
+}
+```
+
 
 ## Spinner
 
@@ -1299,6 +1561,9 @@ However, there are still global styles that need to be included in order for an 
 
 The basic set of CSS files should be included to ensure the Ionic application behaves natively.
 
+- **core.css**
+Contains styles for the font, structure, and the `color` property for all Ionic components.
+
 - **normalize.css**
 Normalizes the CSS differences between browsers, it's based on https://necolas.github.io/normalize.css/
 
@@ -1307,9 +1572,6 @@ Applies styles to the `<html>` element and defaults `box-sizing` to `border-box`
 
 - **typography.css**
 Changes the `font-family` of the whole page based on the mode selected (iOS or Material Design). It also applies global styles to native HTML elements.
-
-- **colors.css**
-Allows the `color` property to work across all Ionic components.
 
 
 #### Additional CSS Files
@@ -1350,10 +1612,10 @@ To use the css in production, we recommend importing it into a global file, such
 
 ```css
 /** Basic CSS for Ionic Apps */
+@import "~@ionic/angular/css/core.css";
 @import "~@ionic/angular/css/normalize.css";
 @import "~@ionic/angular/css/structure.css";
 @import "~@ionic/angular/css/typography.css";
-@import "~@ionic/angular/css/colors.css";
 
 /** Optional CSS utilities that can be commented out */
 @import "~@ionic/angular/css/padding.css";

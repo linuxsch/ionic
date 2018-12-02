@@ -1,8 +1,11 @@
+import { defineCustomElements } from '@ionic/core/loader';
 import { Config } from './providers/config';
-// @ts-ignore
-import { defineCustomElements } from '@ionic/core/dist/esm';
 import { IonicWindow } from './types/interfaces';
 
+// Webpack import for ionicons
+// @ts-ignore
+// tslint:disable-next-line:no-import-side-effect
+import '@ionic/core/dist/ionic/svg';
 
 export function appInitialize(config: Config) {
   return () => {
@@ -11,9 +14,10 @@ export function appInitialize(config: Config) {
       const Ionic = win.Ionic = win.Ionic || {};
 
       Ionic.config = config;
+      Ionic.asyncQueue = false;
 
       Ionic.ael = (elm, eventName, cb, opts) => {
-        if (elm.__zone_symbol__addEventListener) {
+        if (elm.__zone_symbol__addEventListener && skipZone(eventName)) {
           elm.__zone_symbol__addEventListener(eventName, cb, opts);
         } else {
           elm.addEventListener(eventName, cb, opts);
@@ -21,18 +25,10 @@ export function appInitialize(config: Config) {
       };
 
       Ionic.rel = (elm, eventName, cb, opts) => {
-        if (elm.__zone_symbol__removeEventListener) {
+        if (elm.__zone_symbol__removeEventListener && skipZone(eventName)) {
           elm.__zone_symbol__removeEventListener(eventName, cb, opts);
         } else {
           elm.removeEventListener(eventName, cb, opts);
-        }
-      };
-
-      Ionic.raf = (cb: any) => {
-        if (win.__zone_symbol__requestAnimationFrame) {
-          win.__zone_symbol__requestAnimationFrame(cb);
-        } else {
-          win.requestAnimationFrame(cb);
         }
       };
 
@@ -40,4 +36,23 @@ export function appInitialize(config: Config) {
       defineCustomElements(win);
     }
   };
+}
+
+const SKIP_ZONE = [
+  'scroll',
+  'resize',
+
+  'touchstart',
+  'touchmove',
+  'touchend',
+
+  'mousedown',
+  'mousemove',
+  'mouseup',
+
+  'ionStyle',
+];
+
+function skipZone(eventName: string) {
+  return SKIP_ZONE.indexOf(eventName) >= 0;
 }
